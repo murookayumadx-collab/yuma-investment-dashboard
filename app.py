@@ -101,7 +101,15 @@ if not data.empty and len(data) >= 200:
     low_52w = float(data["Low"].squeeze().tail(252).min())
     high_low_ok = (price >= low_52w * 1.30) and (price >= high_52w * 0.75)
     drawdown = (price / float(close.tail(20).max()) - 1) * 100
-    score = 0
+    # ディストリビューション日数（簡易版）
+daily_change = close.pct_change()
+volume_increase = volume > volume.shift(1)
+
+distribution_days = (
+    (daily_change <= -0.002)
+    & volume_increase
+).tail(25).sum()
+score = 0
 
     # 50日移動平均線を下回る
     if price < ma50:
@@ -118,7 +126,16 @@ if not data.empty and len(data) >= 200:
         and volume.iloc[-1] >= avg_volume * 1.5
     ):
         score += 30
-    st.subheader("📈 ミネルヴィニ式トレンド判定")
+st.subheader("📉 売り抜け警戒分析")
+st.metric("直近25営業日の売り抜け警戒日数", int(distribution_days))
+
+if distribution_days >= 6:
+    st.error("🔴 売り圧力に強く警戒")
+elif distribution_days >= 4:
+    st.warning("🟡 売り圧力に注意")
+else:
+    st.success("🟢 売り圧力は比較的限定的")
+st.subheader("📈 ミネルヴィニ式トレンド判定")
     if above_ma150:
         st.success("🟢 株価が150日線より上：条件クリア")
     else:
