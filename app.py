@@ -92,6 +92,7 @@ if not data.empty and len(data) >= 200:
     price = float(close.iloc[-1])
     ma50 = float(close.rolling(50).mean().iloc[-1])
     ma200 = float(close.rolling(200).mean().iloc[-1])
+    trend_ok = ma50 > ma200
     avg_volume = float(volume.shift(1).rolling(20).mean().iloc[-1])
     drawdown = (price / float(close.tail(20).max()) - 1) * 100
     score = 0
@@ -111,7 +112,12 @@ if not data.empty and len(data) >= 200:
         and volume.iloc[-1] >= avg_volume * 1.5
     ):
         score += 30
+    st.subheader("📈 ミネルヴィニ式トレンド判定")
 
+    if trend_ok:
+        st.success("🟢 50日線が200日線より上：上昇トレンド条件クリア")
+    else:
+        st.warning("🟡 50日線が200日線以下：トレンドに注意")
     st.subheader("🎯 総合売却警戒スコア")
     st.metric("警戒スコア", f"{score} / 100")
     if drawdown <= -8:
