@@ -286,3 +286,73 @@ if high_results:
     st.dataframe(high_table, hide_index=True)
 else:
     st.warning("高値分析用のデータを取得できませんでした")
+
+    # 売却監視ダッシュボード
+st.subheader("🚨 売却監視ダッシュボード")
+
+watchlist = ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]
+summary = []
+
+for symbol in watchlist:
+    try:
+        stock = yf.download(
+            symbol, period="1y",
+            auto_adjust=True, progress=False
+        )
+
+        if len(stock) < 200:
+            continue
+
+        close = stock["Close"].squeeze()
+        high = stock["High"].squeeze()
+        volume = stock["Volume"].squeeze()
+
+        price = float(close.iloc[-1])
+        ma50 = float(close.rolling(50).mean().iloc[-1])
+        ma200 = float(close.rolling(200).mean().iloc[-1])
+        peak = float(high.max())
+        decline = (price / peak - 1) * 100
+
+        avg_vol = float(
+            volume.shift(1).rolling(20).mean().iloc[-1]
+        )
+
+        score = 0
+
+        if price < ma50:
+            score += 30
+        if price < ma200:
+            score += 40
+        if (
+            close.iloc[-1] < close.iloc[-2]
+            and avg_vol > 0
+            and volume.iloc[-1] >= avg_vol * 1.5
+        ):
+            score += 30
+
+        if score >= 70:
+            level = "🔴 高"
+        elif score >= 30:
+            level = "🟡 中"
+        else:
+            level = "🟢 低"
+
+        summary.append({
+            "銘柄": symbol,
+            "株価($)": round(price, 2),
+            "警戒スコア": score,
+            "警戒度": level,
+            "高値からの下落(%)": round(decline, 2)
+        })
+
+    except Exception as e:
+        st.warning(f"{symbol}: データ取得エラー")
+
+if summary:
+    summary_df = pd.DataFrame(summary)
+    summary_df = summary_df.sort_values(
+        "警戒スコア", ascending=False
+    )
+    st.dataframe(summary_df, hide_index=True)
+else:
+    st.warning("監視データを取得できませんでした")
