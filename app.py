@@ -246,3 +246,43 @@ if len(spy_data) >= 64:
         st.dataframe(rs_table, hide_index=True)
 else:
     st.warning("RS分析用のデータが不足しています")
+
+    # 52週高値からの下落率分析
+st.subheader("📉 52週高値からの下落率")
+
+high_results = []
+
+for symbol in ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]:
+    stock = yf.download(
+        symbol,
+        period="1y",
+        auto_adjust=True,
+        progress=False
+    )
+
+    if stock.empty:
+        continue
+
+    close = stock["Close"].squeeze()
+    high = stock["High"].squeeze()
+
+    latest_price = float(close.iloc[-1])
+    highest_price = float(high.max())
+
+    decline = (latest_price / highest_price - 1) * 100
+
+    high_results.append({
+        "銘柄": symbol,
+        "現在株価($)": round(latest_price, 2),
+        "52週高値($)": round(highest_price, 2),
+        "高値からの下落率(%)": round(decline, 2)
+    })
+
+if high_results:
+    high_table = pd.DataFrame(high_results)
+    high_table = high_table.sort_values(
+        "高値からの下落率(%)"
+    )
+    st.dataframe(high_table, hide_index=True)
+else:
+    st.warning("高値分析用のデータを取得できませんでした")
