@@ -95,6 +95,9 @@ if not data.empty and len(data) >= 200:
     trend_ok = ma50 > ma200
     ma200_rising = ma200 > float(close.rolling(200).mean().iloc[-20])
     avg_volume = float(volume.shift(1).rolling(20).mean().iloc[-1])
+    high_52w = float(data["High"].tail(252).max())
+    low_52w = float(data["Low"].tail(252).min())
+    high_low_ok = (price >= low_52w * 1.30) and (price >= high_52w * 0.75)
     drawdown = (price / float(close.tail(20).max()) - 1) * 100
     score = 0
 
@@ -128,7 +131,10 @@ if not data.empty and len(data) >= 200:
         st.success("🟢 200日線が上昇中：長期トレンド良好")
     else:
         st.warning("🟡 200日線が横ばい・下降：長期トレンドに注意")
-
+    if high_low_ok:
+        st.success("🟢 52週高値・安値条件クリア")
+    else:
+        st.warning("🟡 52週高値・安値条件を満たしていません")
     st.subheader("🎯 総合売却警戒スコア")
     st.subheader("🎯 総合売却警戒スコア")
 
