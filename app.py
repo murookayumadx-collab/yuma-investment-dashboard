@@ -23,18 +23,21 @@ st.write("② 保有銘柄の売却警戒アラート")
 st.write("③ CAN SLIM × SEPA スコア")
 st.write("④ 米国市場の地合い分析")
 import yfinance as yf
+@st.cache_data(ttl=900)
+def get_stock_data(symbol, period="1y"):
+    return yf.download(
+        symbol,
+        period=period,
+        auto_adjust=True,
+        progress=False
+    )
 
 ticker = st.selectbox(
     "分析する銘柄を選んでね",
 WATCHLIST
 )
 
-data = yf.download(
-    ticker,
-    period="1y",
-    auto_adjust=True,
-    progress=False
-)
+data = get_stock_data(ticker)
 
 if not data.empty:
     st.line_chart(data["Close"])
@@ -126,10 +129,7 @@ tickers = WATCHLIST
 results = []
 
 for symbol in tickers:
-    stock = yf.download(
-        symbol, period="1y",
-        auto_adjust=True, progress=False
-    )
+   stock = get_stock_data(symbol)
 
     if len(stock) < 200:
         continue
@@ -182,12 +182,7 @@ market_tickers = {
 }
 
 for name, symbol in market_tickers.items():
-    market = yf.download(
-        symbol,
-        period="1y",
-        auto_adjust=True,
-        progress=False
-    )
+        market = get_stock_data(symbol)
 
     if len(market) < 200:
         st.warning(f"{name}: データ不足")
@@ -211,10 +206,7 @@ st.subheader("💪 RS分析（市場平均との比較）")
 
 rs_tickers = WATCHLIST
 
-spy_data = yf.download(
-    "SPY", period="6mo",
-    auto_adjust=True, progress=False
-)
+spy_data = get_stock_data("SPY", period="6mo")
 
 if len(spy_data) >= 64:
     spy_close = spy_data["Close"].squeeze()
@@ -223,10 +215,7 @@ if len(spy_data) >= 64:
     rs_results = []
 
     for symbol in rs_tickers:
-        stock_data = yf.download(
-            symbol, period="6mo",
-            auto_adjust=True, progress=False
-        )
+       stock_data = get_stock_data(symbol, period="6mo")
 
         if len(stock_data) < 64:
             continue
@@ -259,13 +248,7 @@ st.subheader("📉 52週高値からの下落率")
 high_results = []
 
 for symbol in WATCHLIST:
-    stock = yf.download(
-        symbol,
-        period="1y",
-        auto_adjust=True,
-        progress=False
-    )
-
+        stock = get_stock_data(symbol)
     if stock.empty:
         continue
 
@@ -301,11 +284,7 @@ summary = []
 
 for symbol in watchlist:
     try:
-        stock = yf.download(
-            symbol, period="1y",
-            auto_adjust=True, progress=False
-        )
-
+                    stock = get_stock_data(symbol)
         if len(stock) < 200:
             continue
 
@@ -367,10 +346,7 @@ else:
 st.subheader("⚡ 売却警戒シグナルの変化")
 
 for symbol in WATCHLIST:
-    stock = yf.download(
-        symbol, period="1y",
-        auto_adjust=True, progress=False
-    )
+        stock = get_stock_data(symbol)
 
     if len(stock) < 201:
         continue
