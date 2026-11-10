@@ -209,7 +209,7 @@ for name, symbol in market_tickers.items():
         # RS分析：過去3か月のS&P500との比較
 st.subheader("💪 RS分析（市場平均との比較）")
 
-rs_tickers = ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]
+rs_tickers = WATCHLIST
 
 spy_data = yf.download(
     "SPY", period="6mo",
@@ -258,7 +258,7 @@ st.subheader("📉 52週高値からの下落率")
 
 high_results = []
 
-for symbol in ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]:
+for symbol in WATCHLIST:
     stock = yf.download(
         symbol,
         period="1y",
@@ -296,7 +296,7 @@ else:
     # 売却監視ダッシュボード
 st.subheader("🚨 売却監視ダッシュボード")
 
-watchlist = ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]
+watchlist = WATCHLIST
 summary = []
 
 for symbol in watchlist:
@@ -366,7 +366,7 @@ else:
     # 売却シグナルの変化を検出
 st.subheader("⚡ 売却警戒シグナルの変化")
 
-for symbol in ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]:
+for symbol in WATCHLIST:
     stock = yf.download(
         symbol, period="1y",
         auto_adjust=True, progress=False
