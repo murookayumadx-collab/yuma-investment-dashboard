@@ -356,3 +356,58 @@ if summary:
     st.dataframe(summary_df, hide_index=True)
 else:
     st.warning("監視データを取得できませんでした")
+
+    # 売却シグナルの変化を検出
+st.subheader("⚡ 売却警戒シグナルの変化")
+
+for symbol in ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]:
+    stock = yf.download(
+        symbol, period="1y",
+        auto_adjust=True, progress=False
+    )
+
+    if len(stock) < 201:
+        continue
+
+    close = stock["Close"].squeeze()
+    volume = stock["Volume"].squeeze()
+
+    ma50 = close.rolling(50).mean()
+    ma200 = close.rolling(200).mean()
+    avg_vol = volume.shift(1).rolling(20).mean()
+
+    def get_score(i):
+        score = 0
+
+        if close.iloc[i] < ma50.iloc[i]:
+            score += 30
+
+        if close.iloc[i] < ma200.iloc[i]:
+            score += 40
+
+        if (
+            close.iloc[i] < close.iloc[i - 1]
+            and avg_vol.iloc[i] > 0
+            and volume.iloc[i] >= avg_vol.iloc[i] * 1.5
+        ):
+            score += 30
+
+        return score
+
+    yesterday = get_score(-2)
+    today = get_score(-1)
+
+    if today > yesterday:
+        st.error(
+            f"🔴 {symbol}: 警戒スコア悪化 "
+            f"{yesterday} → {today}"
+        )
+    elif today < yesterday:
+        st.success(
+            f"🟢 {symbol}: 警戒スコア改善 "
+            f"{yesterday} → {today}"
+        )
+    else:
+        st.info(
+            f"⚪ {symbol}: 変化なし（{today}点）"
+        )
