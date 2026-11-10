@@ -93,6 +93,8 @@ if not data.empty and len(data) >= 200:
     ma50 = float(close.rolling(50).mean().iloc[-1])
     ma200 = float(close.rolling(200).mean().iloc[-1])
     trend_ok = ma50 > ma200
+    ma150 = float(close.rolling(150).mean().iloc[-1])
+    above_ma150 = price > ma150
     ma200_rising = ma200 > float(close.rolling(200).mean().iloc[-20])
     avg_volume = float(volume.shift(1).rolling(20).mean().iloc[-1])
     high_52w = float(data["High"].squeeze().tail(252).max())
@@ -117,7 +119,10 @@ if not data.empty and len(data) >= 200:
     ):
         score += 30
     st.subheader("📈 ミネルヴィニ式トレンド判定")
-
+    if above_ma150:
+        st.success("🟢 株価が150日線より上：条件クリア")
+    else:
+        st.warning("🟡 株価が150日線以下：注意")
     if trend_ok:
         st.success("🟢 50日線が200日線より上：上昇トレンド条件クリア")
     else:
@@ -131,6 +136,19 @@ if not data.empty and len(data) >= 200:
         st.success("🟢 52週高値・安値条件クリア")
     else:
         st.warning("🟡 52週高値・安値条件を満たしていません")
+    trend_all_ok = (
+        above_ma150
+        and trend_ok
+        and ma200_rising
+        and high_low_ok
+    )
+
+    st.subheader("📊 トレンド総合判定")
+
+    if trend_all_ok:
+        st.success("🟢 4条件すべてクリア")
+    else:
+        st.warning("🟡 トレンド条件に未達あり")
     st.subheader("🎯 総合売却警戒スコア")
     st.subheader("📊 ミネルヴィーニ式 総合トレンド判定")
 
