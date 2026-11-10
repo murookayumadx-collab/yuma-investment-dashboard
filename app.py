@@ -53,3 +53,24 @@ if not data.empty:
         st.warning("🟡 注意：50日移動平均線を下回っています")
     else:
         st.success("🟢 トレンド良好：主要移動平均線の上にあります")
+
+        # 出来高による売却警戒シグナル
+if not data.empty and len(data) >= 21:
+    close = data["Close"].squeeze()
+    volume = data["Volume"].squeeze()
+
+    avg_volume = volume.shift(1).rolling(20).mean()
+
+    price_down = close.iloc[-1] < close.iloc[-2]
+    volume_ratio = volume.iloc[-1] / avg_volume.iloc[-1]
+
+    st.subheader("📊 出来高分析")
+
+    st.write(f"直近の出来高倍率：{volume_ratio:.2f}倍")
+
+    if price_down and volume_ratio >= 1.5:
+        st.error("🔴 警戒：株価下落＋出来高急増")
+    elif price_down and volume_ratio >= 1.0:
+        st.warning("🟡 注意：平均以上の出来高を伴う下落")
+    else:
+        st.success("🟢 出来高による強い売り警戒なし")
