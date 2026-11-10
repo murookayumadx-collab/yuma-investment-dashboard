@@ -165,3 +165,37 @@ if results:
     st.dataframe(ranking, hide_index=True)
 else:
     st.warning("ランキング用の株価データを取得できませんでした")
+
+    # 米国市場のトレンド分析
+st.subheader("🌎 米国市場の環境チェック")
+
+market_tickers = {
+    "NASDAQ100": "QQQ",
+    "S&P500": "SPY",
+    "半導体セクター": "SOXX"
+}
+
+for name, symbol in market_tickers.items():
+    market = yf.download(
+        symbol,
+        period="1y",
+        auto_adjust=True,
+        progress=False
+    )
+
+    if len(market) < 200:
+        st.warning(f"{name}: データ不足")
+        continue
+
+    close = market["Close"].squeeze()
+
+    price = float(close.iloc[-1])
+    ma50 = float(close.rolling(50).mean().iloc[-1])
+    ma200 = float(close.rolling(200).mean().iloc[-1])
+
+    if price < ma200:
+        st.error(f"🔴 {name}: 市場環境に強い警戒")
+    elif price < ma50:
+        st.warning(f"🟡 {name}: 市場環境に注意")
+    else:
+        st.success(f"🟢 {name}: 上昇トレンド")
