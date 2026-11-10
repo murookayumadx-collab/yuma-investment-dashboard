@@ -443,7 +443,22 @@ for symbol in WATCHLIST:
         ):
             score += 30
 
-        return score
+        # その日までの直近25営業日で売り抜け警戒日を数える
+        distribution_days = 0
+        start = max(1, len(close) + i - 24) if i < 0 else max(1, i - 24)
+        end = len(close) + i if i < 0 else i
+
+        for j in range(start, end + 1):
+            if (
+                close.iloc[j] <= close.iloc[j - 1] * 0.998
+                and volume.iloc[j] > volume.iloc[j - 1]
+            ):
+                distribution_days += 1
+
+        if distribution_days >= 6:
+            score += 20
+
+        return min(score, 100)
 
     yesterday = get_score(-2)
     today = get_score(-1)
@@ -462,3 +477,17 @@ for symbol in WATCHLIST:
         st.info(
             f"⚪ {symbol}: 変化なし（{today}点）"
         )
+
+st.subheader("📉 売却警戒スコアの推移（60営業日）")
+
+history = []
+
+for i in range(-60, 0):
+    history.append({
+        "日付": close.index[i],
+        "警戒スコア": get_score(i)
+    })
+
+history_df = pd.DataFrame(history).set_index("日付")
+
+st.line_chart(history_df)
