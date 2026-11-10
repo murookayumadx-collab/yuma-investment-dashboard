@@ -477,7 +477,14 @@ for symbol in WATCHLIST:
         st.info(
             f"⚪ {symbol}: 変化なし（{today}点）"
         )
+# グラフ用に選択銘柄のデータを取得
+stock = get_stock_data(ticker)
+close = stock["Close"].squeeze()
+volume = stock["Volume"].squeeze()
 
+ma50 = close.rolling(50).mean()
+ma200 = close.rolling(200).mean()
+avg_vol = volume.shift(1).rolling(20).mean()
 st.subheader("📉 売却警戒スコアの推移（60営業日）")
 
 history = []
