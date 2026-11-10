@@ -16,3 +16,21 @@ st.write("① 買い候補ランキング TOP20")
 st.write("② 保有銘柄の売却警戒アラート")
 st.write("③ CAN SLIM × SEPA スコア")
 st.write("④ 米国市場の地合い分析")
+import yfinance as yf
+
+ticker = st.selectbox(
+    "分析する銘柄を選んでね",
+    ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]
+)
+
+data = yf.download(
+    ticker,
+    period="1y",
+    auto_adjust=True,
+    progress=False
+)
+
+if not data.empty:
+    st.line_chart(data["Close"])
+else:
+    st.warning("株価データを取得できませんでした")
