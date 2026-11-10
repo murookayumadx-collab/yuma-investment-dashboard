@@ -129,7 +129,7 @@ tickers = WATCHLIST
 results = []
 
 for symbol in tickers:
-   stock = get_stock_data(symbol)
+    stock = get_stock_data(symbol)
 
     if len(stock) < 200:
         continue
@@ -182,7 +182,7 @@ market_tickers = {
 }
 
 for name, symbol in market_tickers.items():
-        market = get_stock_data(symbol)
+    market = get_stock_data(symbol)
 
     if len(market) < 200:
         st.warning(f"{name}: データ不足")
@@ -215,7 +215,7 @@ if len(spy_data) >= 64:
     rs_results = []
 
     for symbol in rs_tickers:
-       stock_data = get_stock_data(symbol, period="6mo")
+        stock_data = get_stock_data(symbol, period="6mo")
 
         if len(stock_data) < 64:
             continue
@@ -248,7 +248,7 @@ st.subheader("📉 52週高値からの下落率")
 high_results = []
 
 for symbol in WATCHLIST:
-        stock = get_stock_data(symbol)
+    stock = get_stock_data(symbol)
     if stock.empty:
         continue
 
@@ -284,7 +284,7 @@ summary = []
 
 for symbol in watchlist:
     try:
-                    stock = get_stock_data(symbol)
+        stock = get_stock_data(symbol)
         if len(stock) < 200:
             continue
 
@@ -346,7 +346,7 @@ else:
 st.subheader("⚡ 売却警戒シグナルの変化")
 
 for symbol in WATCHLIST:
-        stock = get_stock_data(symbol)
+    stock = get_stock_data(symbol)
 
     if len(stock) < 201:
         continue
