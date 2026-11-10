@@ -93,7 +93,7 @@ if not data.empty and len(data) >= 200:
     ma50 = float(close.rolling(50).mean().iloc[-1])
     ma200 = float(close.rolling(200).mean().iloc[-1])
     avg_volume = float(volume.shift(1).rolling(20).mean().iloc[-1])
-
+    drawdown = (price / float(close.tail(20).max()) - 1) * 100
     score = 0
 
     # 50日移動平均線を下回る
@@ -114,7 +114,8 @@ if not data.empty and len(data) >= 200:
 
     st.subheader("🎯 総合売却警戒スコア")
     st.metric("警戒スコア", f"{score} / 100")
-
+    if drawdown <= -8:
+        st.warning("⚠️ 直近20営業日の最高終値から8%以上下落")
     if score >= 70:
         st.error("🔴 警戒度：高｜売却・縮小を優先的に検討")
     elif score >= 30:
