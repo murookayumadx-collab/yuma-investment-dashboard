@@ -1,5 +1,5 @@
 import streamlit as st
-
+import pandas as pd
 st.set_page_config(
     page_title="YUMA Investment System",
     page_icon="📈",
@@ -112,3 +112,56 @@ if not data.empty and len(data) >= 200:
         st.warning("🟡 警戒度：中｜保有状況を再確認")
     else:
         st.success("🟢 警戒度：低｜現時点の警戒条件なし")
+
+        # 5銘柄の売却警戒ランキング
+st.subheader("🏆 売却警戒ランキング")
+
+tickers = ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]
+results = []
+
+for symbol in tickers:
+    stock = yf.download(
+        symbol, period="1y",
+        auto_adjust=True, progress=False
+    )
+
+    if len(stock) < 200:
+        continue
+
+    close = stock["Close"].squeeze()
+    volume = stock["Volume"].squeeze()
+
+    price = float(close.iloc[-1])
+    ma50 = float(close.rolling(50).mean().iloc[-1])
+    ma200 = float(close.rolling(200).mean().iloc[-1])
+    avg_vol = float(volume.shift(1).rolling(20).mean().iloc[-1])
+
+    score = 0
+
+    if price < ma50:
+        score += 30
+
+    if price < ma200:
+        score += 40
+
+    if (
+        close.iloc[-1] < close.iloc[-2]
+        and avg_vol > 0
+        and volume.iloc[-1] >= avg_vol * 1.5
+    ):
+        score += 30
+
+    results.append({
+        "銘柄": symbol,
+        "警戒スコア": score,
+        "株価($)": round(price, 2)
+    })
+
+if results:
+    ranking = pd.DataFrame(results)
+    ranking = ranking.sort_values(
+        "警戒スコア", ascending=False
+    )
+    st.dataframe(ranking, hide_index=True)
+else:
+    st.warning("ランキング用の株価データを取得できませんでした")
