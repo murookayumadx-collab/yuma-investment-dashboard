@@ -122,11 +122,7 @@ if not data.empty and len(data) >= 200:
         st.success("🟢 50日線が200日線より上：上昇トレンド条件クリア")
     else:
         st.warning("🟡 50日線が200日線以下：トレンドに注意")
-    if trend_ok:
-        st.success("🟢 50日線が200日線より上：上昇トレンド条件クリア")
-    else:
-        st.warning("🟡 50日線が200日線以下：トレンドに注意")
-
+    
     if ma200_rising:
         st.success("🟢 200日線が上昇中：長期トレンド良好")
     else:
@@ -136,6 +132,14 @@ if not data.empty and len(data) >= 200:
     else:
         st.warning("🟡 52週高値・安値条件を満たしていません")
     st.subheader("🎯 総合売却警戒スコア")
+    st.subheader("📊 ミネルヴィーニ式 総合トレンド判定")
+
+    if trend_ok and ma200_rising and high_low_ok:
+        st.success("🟢 3条件クリア：上昇トレンド良好")
+    elif not trend_ok and not ma200_rising:
+        st.error("🔴 トレンド悪化：売却・縮小を検討")
+    else:
+        st.warning("🟡 一部条件未達：慎重に監視")
     st.subheader("🎯 総合売却警戒スコア")
 
     if drawdown <= -8:
