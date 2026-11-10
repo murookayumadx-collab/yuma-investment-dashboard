@@ -122,7 +122,7 @@ if not data.empty and len(data) >= 200:
         # 5銘柄の売却警戒ランキング
 st.subheader("🏆 売却警戒ランキング")
 
-tickers = ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]
+tickers = WATCHLIST
 results = []
 
 for symbol in tickers:
