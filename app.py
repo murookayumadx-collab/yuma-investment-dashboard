@@ -1,3 +1,9 @@
+# 監視銘柄の共通設定
+WATCHLIST = [
+    "NVDA", "MU", "GOOGL", "MSFT", "TSM",
+    "AVGO", "CRWD", "ANET", "VRT", "COHR"
+]
+
 import streamlit as st
 import pandas as pd
 st.set_page_config(
@@ -20,7 +26,7 @@ import yfinance as yf
 
 ticker = st.selectbox(
     "分析する銘柄を選んでね",
-    ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]
+WATCHLIST
 )
 
 data = yf.download(
