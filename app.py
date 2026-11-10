@@ -34,3 +34,22 @@ if not data.empty:
     st.line_chart(data["Close"])
 else:
     st.warning("株価データを取得できませんでした")
+
+    # 売却警戒シグナル
+if not data.empty:
+    close = data["Close"].squeeze()
+    ma50 = close.rolling(50).mean()
+    ma200 = close.rolling(200).mean()
+
+    price = float(close.iloc[-1])
+    avg50 = float(ma50.iloc[-1])
+    avg200 = float(ma200.iloc[-1])
+
+    st.subheader("🚨 売却警戒シグナル")
+
+    if price < avg200:
+        st.error("🔴 強い警戒：200日移動平均線を下回っています")
+    elif price < avg50:
+        st.warning("🟡 注意：50日移動平均線を下回っています")
+    else:
+        st.success("🟢 トレンド良好：主要移動平均線の上にあります")
