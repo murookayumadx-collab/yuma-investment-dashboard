@@ -199,3 +199,50 @@ for name, symbol in market_tickers.items():
         st.warning(f"🟡 {name}: 市場環境に注意")
     else:
         st.success(f"🟢 {name}: 上昇トレンド")
+
+        # RS分析：過去3か月のS&P500との比較
+st.subheader("💪 RS分析（市場平均との比較）")
+
+rs_tickers = ["NVDA", "MU", "GOOGL", "MSFT", "TSM"]
+
+spy_data = yf.download(
+    "SPY", period="6mo",
+    auto_adjust=True, progress=False
+)
+
+if len(spy_data) >= 64:
+    spy_close = spy_data["Close"].squeeze()
+    spy_return = (spy_close.iloc[-1] / spy_close.iloc[-64] - 1) * 100
+
+    rs_results = []
+
+    for symbol in rs_tickers:
+        stock_data = yf.download(
+            symbol, period="6mo",
+            auto_adjust=True, progress=False
+        )
+
+        if len(stock_data) < 64:
+            continue
+
+        stock_close = stock_data["Close"].squeeze()
+        stock_return = (
+            stock_close.iloc[-1] / stock_close.iloc[-64] - 1
+        ) * 100
+
+        rs_results.append({
+            "銘柄": symbol,
+            "3か月騰落率(%)": round(float(stock_return), 2),
+            "SPYとの差(%pt)": round(
+                float(stock_return - spy_return), 2
+            )
+        })
+
+    if rs_results:
+        rs_table = pd.DataFrame(rs_results)
+        rs_table = rs_table.sort_values(
+            "SPYとの差(%pt)", ascending=False
+        )
+        st.dataframe(rs_table, hide_index=True)
+else:
+    st.warning("RS分析用のデータが不足しています")
