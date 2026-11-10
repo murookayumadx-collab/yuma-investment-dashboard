@@ -102,14 +102,14 @@ if not data.empty and len(data) >= 200:
     high_low_ok = (price >= low_52w * 1.30) and (price >= high_52w * 0.75)
     drawdown = (price / float(close.tail(20).max()) - 1) * 100
     # ディストリビューション日数（簡易版）
-daily_change = close.pct_change()
-volume_increase = volume > volume.shift(1)
+    daily_change = close.pct_change()
+    volume_increase = volume > volume.shift(1)
 
-distribution_days = (
-    (daily_change <= -0.002)
-    & volume_increase
-).tail(25).sum()
-score = 0
+    distribution_days = (
+        (daily_change <= -0.002)
+        & volume_increase
+    ).tail(25).sum()
+    score = 0
 
     # 50日移動平均線を下回る
     if price < ma50:
@@ -126,6 +126,11 @@ score = 0
         and volume.iloc[-1] >= avg_volume * 1.5
     ):
         score += 30
+    # 売り抜け警戒日数による加点
+    if distribution_days >= 6:
+        score += 20
+
+    score = min(score, 100)
 st.subheader("📉 売り抜け警戒分析")
 st.metric("直近25営業日の売り抜け警戒日数", int(distribution_days))
 
