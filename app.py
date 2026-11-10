@@ -74,3 +74,41 @@ if not data.empty and len(data) >= 21:
         st.warning("🟡 注意：平均以上の出来高を伴う下落")
     else:
         st.success("🟢 出来高による強い売り警戒なし")
+
+        # 総合売却警戒スコア
+if not data.empty and len(data) >= 200:
+    close = data["Close"].squeeze()
+    volume = data["Volume"].squeeze()
+
+    price = float(close.iloc[-1])
+    ma50 = float(close.rolling(50).mean().iloc[-1])
+    ma200 = float(close.rolling(200).mean().iloc[-1])
+    avg_volume = float(volume.shift(1).rolling(20).mean().iloc[-1])
+
+    score = 0
+
+    # 50日移動平均線を下回る
+    if price < ma50:
+        score += 30
+
+    # 200日移動平均線を下回る
+    if price < ma200:
+        score += 40
+
+    # 出来高急増を伴う下落
+    if (
+        close.iloc[-1] < close.iloc[-2]
+        and avg_volume > 0
+        and volume.iloc[-1] >= avg_volume * 1.5
+    ):
+        score += 30
+
+    st.subheader("🎯 総合売却警戒スコア")
+    st.metric("警戒スコア", f"{score} / 100")
+
+    if score >= 70:
+        st.error("🔴 警戒度：高｜売却・縮小を優先的に検討")
+    elif score >= 30:
+        st.warning("🟡 警戒度：中｜保有状況を再確認")
+    else:
+        st.success("🟢 警戒度：低｜現時点の警戒条件なし")
