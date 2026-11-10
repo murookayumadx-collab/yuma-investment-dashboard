@@ -141,15 +141,15 @@ elif distribution_days >= 4:
 else:
     st.success("🟢 売り圧力は比較的限定的")
 st.subheader("📈 ミネルヴィニ式トレンド判定")
-    if above_ma150:
-        st.success("🟢 株価が150日線より上：条件クリア")
-    else:
-        st.warning("🟡 株価が150日線以下：注意")
-    if trend_ok:
-        st.success("🟢 50日線が200日線より上：上昇トレンド条件クリア")
-    else:
-        st.warning("🟡 50日線が200日線以下：トレンドに注意")
-    
+if above_ma150:
+    st.success("🟢 株価が150日線より上：条件クリア")
+else:
+    st.warning("🟡 株価が150日線以下：注意")
+if trend_ok:
+    st.success("🟢 50日線が200日線より上：上昇トレンド条件クリア")
+else:
+    st.warning("🟡 50日線が200日線以下：トレンドに注意")
+
     if ma200_rising:
         st.success("🟢 200日線が上昇中：長期トレンド良好")
     else:
